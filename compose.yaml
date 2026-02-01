@@ -1,0 +1,27 @@
+services:
+  fancontrol:
+    image: fancontrol-it8613e
+    build: .
+    pull_policy: build
+    container_name: fan-fancontrol
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - /dev:/dev:ro
+    environment:
+      # Required: 
+      DRIVE_LIST: sda,sdb,sdc,sdd,sde,sdf,sdg,sdh,sdi # comma-separated drive names
+      SETPOINT: 37                 # target max drive temp °C
+      # Optional:
+      # DEBUG: 0                   # 1 = enable debug logs
+      # PWMINIT: 128               # initial PWM (0–255)
+      # INTERVAL: 10               # poll interval in seconds
+      # OVERHEAT: 45               # °C above which fans run at 100%
+      # PWMMIN: 80                 # minimum PWM (never go below)
+      # KP: 50.0                   # proportional coefficient
+      # KI: 0.5                    # integral coefficient
+      # IMAX: 255.0                # max integral value
+      # KD: 0.0                    # derivative coefficient
+      # CPU_AVG: 10                # CPU temp rolling average count
+      # GRAPHITE_SERVER: host:port # optional metrics for grafana (e.g. 192.168.1.1:2003)
+
