@@ -52,10 +52,9 @@ The container runs with `privileged: true` and mounts `/dev` read-only so the bi
 
 If you wish to build locally with docker instead (development)
 
-1. **Clone** the repo into a path on your data pool (e.g. `/mnt/pool/apps/terramaster-fancontrol-IT8613E`). 
-  - Replace the build property block (3 lines ~) with `build: .`
-
-2. Follow steps 2-4 above
+1. **Clone** the repo into a path on your data pool (e.g. `/mnt/pool/apps/terramaster-fancontrol-IT8613E`).
+2. **Edit** the `compose.yaml` file, replace the `build` property block (3 lines ~) with `build: .`
+3. Follow steps 2-4 above
 
 ---
 
