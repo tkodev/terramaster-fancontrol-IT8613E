@@ -1,7 +1,10 @@
 services:
   fancontrol:
     image: fancontrol-it8613e
-    build: .
+    build:
+      context: https://github.com/tkodev/terramaster-fancontrol-IT8613E.git
+      dockerfile: Dockerfile
+    # build: .
     pull_policy: build
     container_name: fancontrol
     restart: unless-stopped
