@@ -11,9 +11,9 @@ This project builds on the following work (chronological order):
 | Who | Contribution |
 |-----|--------------|
 | **Eudean** | Original Xpenology fancontrol script for TerraMaster F4-220 (IT8772E chipset). [Forum post](https://xpenology.com/forum/topic/14007-terramaster-f4-220-fan-control/?ct=1559481439) |
-| **Nikotine1** | Port to IT8613E and adaptations for F4-424 Pro: drive list argument (no `/opt/disks`), Graphite reporting, PID controller. Tested on OMV/Debian and TrueNAS. [Nikotine1/terramaster-fancontrol-IT8613E](https://github.com/Nikotine1/terramaster-fancontrol-IT8613E) |
-| **rcarmo** | Fork and modifications for F4-424 Max; tested under Proxmox VE 9. [rcarmo/terramaster-fancontrol-IT8613E](https://github.com/rcarmo/terramaster-fancontrol-IT8613E) |
-| **tkodev** | Dockerfile: Docker Build, `entrypoint.sh` (env-to-CLI mapping, loggin to stdout), and `compose.yaml` (running). |
+| **Nikotine1** | Port to IT8613E and adaptations for F4-424 Pro: drive list argument (no `/opt/disks`), Graphite reporting, PID controller. Tested on OMV/Debian and TrueNAS 24.10.1. [Nikotine1/terramaster-fancontrol-IT8613E](https://github.com/Nikotine1/terramaster-fancontrol-IT8613E) |
+| **rcarmo** | Tested for F4-424 Max on Proxmox VE 9. [rcarmo/terramaster-fancontrol-IT8613E](https://github.com/rcarmo/terramaster-fancontrol-IT8613E) |
+| **tkodev** | Dockerfile: Docker Build, `entrypoint.sh` (env-to-CLI mapping, loggin to stdout), and `compose.yaml` (running). Tested for F4-424 Max on TrueNAS 25.04.2.6 |
 
 ---
 
@@ -21,7 +21,7 @@ This project builds on the following work (chronological order):
 
 - **Docker** (for Compose) or **GCC** (for manual build).
 - **Privileged** access and `/dev` for hardware I/O.
-- On TrueNAS Scale 25.04, place the project on a data pool (not the root dataset); [home is not executable](https://forums.truenas.com/t/shell-script-permission-denied-with-24-10-1/27941) for scripts.
+- On TrueNAS Scale 25.04, place the project on a data pool (not the root dataset or user directory); [home is not executable](https://forums.truenas.com/t/shell-script-permission-denied-with-24-10-1/27941) for scripts.
 
 ---
 
