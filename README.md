@@ -27,7 +27,7 @@ This project builds on the following work (chronological order):
 
 ## Docker Compose (recommended)
 
-1. **Clone** the repo into a path on your data pool (e.g. `/mnt/pool/apps/terramaster-fancontrol-IT8613E`).
+1. **Copy** the compose.yaml into a path on your data pool (e.g. `/mnt/pool/apps/terramaster-fancontrol-IT8613E`).
 
 2. **Configure** `compose.yaml`:
    - Set `DRIVE_LIST` to your comma-separated drive names (e.g. `sda,sdb,sdc,sdd`).
@@ -49,6 +49,13 @@ This project builds on the following work (chronological order):
    ```
 
 The container runs with `privileged: true` and mounts `/dev` read-only so the binary can access the IT8613E hardware.
+
+If you wish to build locally with docker instead (development)
+
+1. **Clone** the repo into a path on your data pool (e.g. `/mnt/pool/apps/terramaster-fancontrol-IT8613E`). 
+  - Replace the build property block (3 lines ~) with `build: .`
+
+2. Follow steps 2-4 above
 
 ---
 
