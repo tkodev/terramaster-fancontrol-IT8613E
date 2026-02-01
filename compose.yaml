@@ -3,7 +3,7 @@ services:
     image: fancontrol-it8613e
     build: .
     pull_policy: build
-    container_name: fan-fancontrol
+    container_name: fancontrol
     restart: unless-stopped
     privileged: true
     volumes:
