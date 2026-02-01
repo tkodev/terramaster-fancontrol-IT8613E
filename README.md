@@ -11,9 +11,10 @@ This project builds on the following work (chronological order):
 | Who | Contribution |
 |-----|--------------|
 | **Eudean** | Original Xpenology fancontrol script for TerraMaster F4-220 (IT8772E chipset). [Forum post](https://xpenology.com/forum/topic/14007-terramaster-f4-220-fan-control/?ct=1559481439) |
-| **Nikotine1** | Port to IT8613E and adaptations for F4-424 Pro: drive list argument (no `/opt/disks`), Graphite reporting, PID controller. Tested on OMV/Debian and TrueNAS 24.10.1. [Nikotine1/terramaster-fancontrol-IT8613E](https://github.com/Nikotine1/terramaster-fancontrol-IT8613E) |
-| **rcarmo** | Tested for F4-424 Max on Proxmox VE 9. [rcarmo/terramaster-fancontrol-IT8613E](https://github.com/rcarmo/terramaster-fancontrol-IT8613E) |
-| **tkodev** | Dockerfile: Docker Build, `entrypoint.sh` (env-to-CLI mapping, loggin to stdout), and `compose.yaml` (running). Tested for F4-424 Max on TrueNAS 25.04.2.6 |
+| **@Nikotine1** | Port to IT8613E and adaptations for F4-424 Pro: drive list argument (no `/opt/disks`), Graphite reporting, PID controller. Tested on OMV/Debian and TrueNAS 24.10.1. [Nikotine1/terramaster-fancontrol-IT8613E](https://github.com/Nikotine1/terramaster-fancontrol-IT8613E) |
+| **@rcarmo** | Tested for F4-424 Max on Proxmox VE 9. [rcarmo/terramaster-fancontrol-IT8613E](https://github.com/rcarmo/terramaster-fancontrol-IT8613E) |
+| **@sbogomolov** | Various fixes on **@Nikotine1**'s repo [#1](https://github.com/Nikotine1/terramaster-fancontrol-IT8613E/pull/1) [#2](https://github.com/Nikotine1/terramaster-fancontrol-IT8613E/pull/2) [#3](https://github.com/Nikotine1/terramaster-fancontrol-IT8613E/pull/3) [#4](https://github.com/Nikotine1/terramaster-fancontrol-IT8613E/pull/4) |
+| **@tkodev** | Dockerfile: Docker Build, `entrypoint.sh` (env-to-CLI mapping, loggin to stdout), and `compose.yaml` (running). Tested for F4-424 Max on TrueNAS 25.04.2.6 |
 
 ---
 
