@@ -1,74 +1,124 @@
-# Fan control for TerraMaster on Linux
+# TerraMaster fan control (IT8613E)
 
-Tested with F4-424 Max under Proxmox VE 9. This is a fork of [@Nikotine1's conversion to the F4-424 Pro](Nikotine1/terramaster-fancontrol-IT8613E), which was in turn a direct port of the [Xpenology fancontrol script by Eudean](https://xpenology.com/forum/topic/14007-terramaster-f4-220-fan-control/?ct=1559481439) to work on OMV/Debian and tested on the Pro model.
+User-space fan control for TerraMaster NAS with the IT8613E Super I/O chipset (e.g. F4-424). Uses a PID loop driven by drive and CPU temperatures; optionally reports metrics to Graphite for Grafana.
 
-I intend to make a few changes to this as time progresses.
+**Tested:** TrueNAS Scale 25.04, TerraMaster F4-424 Max.
 
-## Original README follows:
+### Origin and credits
 
-This fork implements changes for it to work with NAS devices containing the IT8613E chipset, while the original program only supported IT8772E (used in the F4-220).
-Initially I made the changes described in [this post](https://xpenology.com/forum/topic/14007-terramaster-f4-220-fan-control/?do=findComment&comment=264172), but in the end I just commented out the part that was specific for the IT8772E.
+This project builds on the following work (chronological order):
 
-Further improvements are:
-1. It no longer uses the creation of files in ``/opt/disks``, named after the disks you want to monitor.
-Instead, you give it a list of drive names as an argument.
-2. I have also added reporting to a Graphite server.
-Enable it by adding ``--graphite_server=<ip address>:<port>``.
-This allows you to monitor the fan speed in Grafana:
-<img width="883" alt="image" src="https://github.com/Nikotine1/terramaster-fancontrol-IT8613E/assets/1538384/a89e8c9d-1ada-490a-b380-9101bc4fa552">
-3. New PID controller for the fan speed.
+| Who | Contribution |
+|-----|--------------|
+| **Eudean** | Original Xpenology fancontrol script for TerraMaster F4-220 (IT8772E chipset). [Forum post](https://xpenology.com/forum/topic/14007-terramaster-f4-220-fan-control/?ct=1559481439) |
+| **Nikotine1** | Port to IT8613E and adaptations for F4-424 Pro: drive list argument (no `/opt/disks`), Graphite reporting, PID controller. Tested on OMV/Debian and TrueNAS. [Nikotine1/terramaster-fancontrol-IT8613E](https://github.com/Nikotine1/terramaster-fancontrol-IT8613E) |
+| **rcarmo** | Fork and modifications for F4-424 Max; tested under Proxmox VE 9. [rcarmo/terramaster-fancontrol-IT8613E](https://github.com/rcarmo/terramaster-fancontrol-IT8613E) |
+| **tkodev** | Dockerfile: Docker Build, `entrypoint.sh` (env-to-CLI mapping, loggin to stdout), and `compose.yaml` (running). |
 
-## Installation:
-Warning: As from Truenas 24.10.1, [the home folder is no longer executable](https://forums.truenas.com/t/shell-script-permission-denied-with-24-10-1/27941). Instead, use the data pool for your scripts.
+---
 
-1. Clone the repo
+## Prerequisites
+
+- **Docker** (for Compose) or **GCC** (for manual build).
+- **Privileged** access and `/dev` for hardware I/O.
+- On TrueNAS Scale 25.04, place the project on a data pool (not the root dataset); [home is not executable](https://forums.truenas.com/t/shell-script-permission-denied-with-24-10-1/27941) for scripts.
+
+---
+
+## Docker Compose (recommended)
+
+1. **Clone** the repo into a path on your data pool (e.g. `/mnt/pool/apps/terramaster-fancontrol-IT8613E`).
+
+2. **Configure** `compose.yaml`:
+   - Set `DRIVE_LIST` to your comma-separated drive names (e.g. `sda,sdb,sdc,sdd`).
+   - Uncomment and set any optional env vars (`SETPOINT`, `DEBUG`, `INTERVAL`, `GRAPHITE_SERVER`, etc.) as needed.
+   - Create the external network if you keep the default, or change/remove `networks` in the file:
+     ```bash
+     docker network create proxy-network
+     ```
+
+3. **Build and run:**
+   ```bash
+   docker compose up -d
    ```
-   git clone https://github.com/Nikotine1/terramaster-fancontrol-IT8613E
+
+4. **Logs / stop:**
+   ```bash
+   docker compose logs -f fancontrol
+   docker compose down
    ```
 
-2. Build with GCC.
-   - Pull the image:
-     ```
-     docker pull gcc
-     ```
-   - Compile fancontrol.cpp:
-     ```
-     sudo docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp gcc gcc -o fancontrol fancontrol.cpp
-     ```
+The container runs with `privileged: true` and mounts `/dev` read-only so the binary can access the IT8613E hardware.
 
-3. Run the compiled program.
-   ```
-   sudo ./fancontrol --drive_list="sda,sdb,sdc,sdd" --debug=1 --setpoint=37
-   ```
-   This will run it in debug mode (1), monitoring drives /dev/sda to d, with temperature setpoint 37°C. Make sure to run with sudo.
+---
 
-4. Alternatively, you can use the included systemd service.
-   - Change the location of the fancontrol application.
-   - Make sure you also add the list of drives there.
-   - Copy it to `/etc/systemd/system`:
-     ```
-     sudo systemctl start fancontrol.service
-     sudo systemctl enable fancontrol.service
-     ```
-   - You will have to reinstall the service after every Truenas update. I use a shell script to do this(install_service.sh).
+## Manual build and execution
 
-## Parameters:
+If you prefer not to use Docker for the running process, build the binary and run it (or use the systemd unit) on the host.
+
+### Build
+
+Using a GCC image (no local toolchain required):
+
+```bash
+docker run --rm -v "$PWD":/build -w /build gcc:latest gcc -o fancontrol fancontrol.cpp
 ```
- fancontrol --drive_list=<drive_list> [--debug=<value>] [--setpoint=<value>] [--pwminit=<value>] [--interval=<value>] [--overheat=<value>] [--pwmmin=<value>] [--kp=<value>] [--ki=<value>] [--imax=<value>] [--kd=<value>] [--cpu_avg=<value>] [--graphite_server=<ip:port>]
 
-drive_list        A comma-separated list of drive names between quotes e.g. 'sda,sdc' (required)
-debug             Enable (1) or disable (0) debug logs (default: 0)
-setpoint          Target maximum hard drive operating temperature in
-                  degrees Celsius (default: 37)
-pwminit           Initial PWM value to write (default: 128)
-interval          How often we poll for temperatures in seconds (default: 10)
-overheat          Overheat temperature threshold in degrees Celsius above
-                  which we drive the fans at maximum speed (default: 45)
-pwmmin            Never drive the fans below this PWM value (default: 80)
-kp                Proportional coefficient (default: 50.0)
-ki                Integral coefficient (default: 0.5)
-imax              Maximum integral value (default: 255.0)
-kd                Derivative coefficient (default: 0.0)
-cpu_avg           Number of CPU temperature measurements for rolling average (default: 10)
-graphite_server   Graphite server IP address and port in the format <ip:port> (optional)
+### Run once
+
+```bash
+sudo ./fancontrol --drive_list="sda,sdb,sdc,sdd" --setpoint=37
 ```
+
+Example with debug and optional Graphite:
+
+```bash
+sudo ./fancontrol --drive_list="sda,sdb,sdc,sdd" --debug=1 --setpoint=37 --graphite_server=192.168.1.1:2003
+```
+
+### Run as a service
+
+Use the included systemd unit:
+
+1. Copy `fancontrol.service` to `/etc/systemd/system/`.
+2. Edit the unit: set the path to the `fancontrol` binary and the `--drive_list=...` (and any other) arguments.
+3. Start and enable:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now fancontrol.service
+   ```
+4. After TrueNAS updates, reinstall or re-enable the unit as needed; `install_service.sh` can automate this.
+
+---
+
+## Parameters
+
+| Parameter         | Env var (Compose) | Description |
+|-------------------|-------------------|-------------|
+| `--drive_list=`   | `DRIVE_LIST`      | Comma-separated drive names (e.g. `sda,sdb,sdc`). **Required.** |
+| `--debug=`        | `DEBUG`           | `1` = debug logs, `0` = quiet (default: `0`). |
+| `--setpoint=`     | `SETPOINT`        | Target max drive temp °C (default: `37`). |
+| `--pwminit=`      | `PWMINIT`         | Initial PWM 0–255 (default: `128`). |
+| `--interval=`     | `INTERVAL`        | Poll interval in seconds (default: `10`). |
+| `--overheat=`     | `OVERHEAT`        | °C above which fans run at 100% (default: `45`). |
+| `--pwmmin=`       | `PWMMIN`          | Minimum PWM; never go below (default: `80`). |
+| `--kp=`           | `KP`              | Proportional gain (default: `50.0`). |
+| `--ki=`           | `KI`              | Integral gain (default: `0.5`). |
+| `--imax=`         | `IMAX`            | Integral clamp (default: `255.0`). |
+| `--kd=`           | `KD`              | Derivative gain (default: `0.0`). |
+| `--cpu_avg=`      | `CPU_AVG`         | CPU temp rolling average sample count (default: `10`). |
+| `--graphite_server=` | `GRAPHITE_SERVER` | Optional; `<ip>:<port>` for Graphite (e.g. Grafana). |
+
+CLI usage:
+
+```text
+fancontrol --drive_list=<list> [--debug=0|1] [--setpoint=<n>] [--pwminit=<n>] ...
+```
+
+When using Docker Compose, the entrypoint maps these env vars to the same CLI options; see `compose.yaml` and `entrypoint.sh`.
+
+---
+
+## License
+
+MIT. See [LICENSE](LICENSE).
